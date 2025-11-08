@@ -10,6 +10,7 @@ typedef struct Player {
     Color default_color;
     float gridX;
     float gridY;
+    float radius;
     int state;
     int intent;
 } Player;

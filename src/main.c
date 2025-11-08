@@ -21,7 +21,7 @@ typedef struct Debug
 
 Settings settings = 
 {
-    .renderDistance = 1,
+    .renderDistance = 5,
 };
 
 void toggleTileOutlines(Debug* debug)
@@ -39,13 +39,13 @@ void toggleTileOutlines(Debug* debug)
 
 void toggleRenderDistance(Settings* settings)
 {
-    if(settings->renderDistance <= 5)
+    if(settings->renderDistance < 10)
     {
         settings->renderDistance += 1;
     }
     else
     {
-        settings->renderDistance = 1;
+        settings->renderDistance = 5;
     }
 }
 
@@ -162,6 +162,7 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "Infinite Terrain with Chunks - Raylib C17");
     SetTargetFPS(60);
+    initWorld();
 
     // Setup camera
     Camera2D camera = { 0 };
@@ -178,10 +179,11 @@ int main(void)
     Player player = { 
         .position = {(float)(startXTile * tileSize), (float)(startYTile * tileSize)},
         .speed = 200.0f,
-        .color = ORANGE,
+        .color = GREEN,
         .default_color = BLUE,
         .state = 0,
         .intent = 0,
+        .radius = 12.0f
     };
 
     Game game = {
@@ -238,12 +240,18 @@ int main(void)
         
         if(debug.isEnabled)
         {
-            char renderDistanceText[50];
-            sprintf(renderDistanceText, "Render Distance: %d", settings.renderDistance);
-            DrawText(renderDistanceText, 10, 40, 20, BLACK);
             char positionText[100];
             sprintf(positionText, "Grid Position: (%.2f, %.2f)", player.gridX, player.gridY);
             DrawText(positionText, 10, 10, 20, BLACK);
+
+            char renderDistanceText[50];
+            sprintf(renderDistanceText, "Render Distance: %d", settings.renderDistance);
+            DrawText(renderDistanceText, 10, 30, 20, BLACK);
+
+            char worldSeedText[50];
+            sprintf(worldSeedText, "World Seed: %d", getWorldSeed());
+            DrawText(worldSeedText, 10, 50, 20, BLACK);
+            
             DrawFPS(678, 5);
         }
         EndDrawing();

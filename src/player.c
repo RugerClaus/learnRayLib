@@ -41,6 +41,6 @@ void DrawPlayer(Player* player, int screenWidth, int screenHeight, int tileSize)
     player->gridX = (player->position.x / tileSize);
     player->gridY = (player->position.y / tileSize);
 
-    DrawCircleV((Vector2){ screenWidth / 2.0f, screenHeight / 2.0f }, 10.0f, player->color);
+    DrawCircleV((Vector2){ screenWidth / 2.0f, screenHeight / 2.0f }, player->radius, player->color);
     
 }

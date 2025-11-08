@@ -4,3 +4,5 @@ I'm not the most familiar with C, but I've been able to wrangle it well enough t
 
 
 I have begun implementing procedural terrain generation with chunking. can't go past 0,0 left or up, but chunks generate continuously in the positive coordinates. I will implement a world border past y 0 or x 0, but other than that it will be infinite
+
+began implementing terrain features from sprites. still figuring that one out, will work on it tonight
