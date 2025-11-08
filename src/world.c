@@ -7,11 +7,15 @@ Chunk chunks[500][500];
 
 WorldData worldData;
 
+
 Texture2D tileSheet;
+const int TILE_PIXELS = 16;
+Rectangle tileRects[TILE_COUNT];
 
 // Example of loading it in your init function
 void initTileSheet() {
-    tileSheet = LoadTexture("../assets/tilesheet.png"); // load your sprite sheet
+    tileSheet = LoadTexture("assets/tilesheet.png"); // load your sprite sheet
+    if (tileSheet.id == 0) printf("Failed to load tilesheet!\n");
 
     // Set source rectangles for each tile in the sheet
     for (int i = 0; i < TILE_COUNT; i++) {
@@ -39,6 +43,7 @@ void initWorld() {
     InitRandom();
     int seed = randRange(100000, 999999);
     setWorldSeed(seed);
+    initTileSheet();
 }
 
 // perlin noise experiment functions
@@ -85,16 +90,16 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
 
             float height = (SmoothNoise(nx, ny) + 1) / 2.0f; // Normalize to [0,1]
 
-            Color tileColor;
-            if (height < 0.3f) tileColor = BLUE;       // Deep ocean
-            else if (height < 0.4f) tileColor = SKYBLUE;    // Shoreline
-            else if (height < 0.45f) tileColor = YELLOW;     // Beach
-            else if (height < 0.6f) tileColor = LIME;       // Grassland
-            else if (height < 0.75f) tileColor = DARKGREEN;      // Hills
-            else if (height < 0.8f) tileColor = LIGHTGRAY;  // Mountains
-            else tileColor = RAYWHITE;      // Snowy peaks
+            int tileType;
+            if (height < 0.3f) tileType = TILE_WATER_DEEP;       // Deep ocean
+            else if (height < 0.35f) tileType = TILE_SHORE;    // Shoreline
+            else if (height < 0.45f) tileType = TILE_SAND;     // Beach
+            else if (height < 0.6f) tileType = TILE_GRASS;       // Grassland
+            else if (height < 0.75f) tileType = TILE_HILLS;      // Hills
+            else if (height < 0.8f) tileType = TILE_MOUNTAIN;  // Mountains
+            else tileType = TILE_SNOW;      // Snowy peaks
 
-            chunk->tiles[row][col] = tileColor;
+            chunk->tiles[row][col] = tileType;
         }
     }
     chunk->isLoaded = true;
@@ -138,10 +143,17 @@ void DrawChunks(Player* player, Settings* settings)
                 if (chunk->isLoaded) {
                     for (int row = 0; row < CHUNK_SIZE; row++) {
                         for (int col = 0; col < CHUNK_SIZE; col++) {
-                            DrawRectangle(
-                                (chunkX * CHUNK_SIZE * TILE_SIZE) + (col * TILE_SIZE),
-                                (chunkY * CHUNK_SIZE * TILE_SIZE) + (row * TILE_SIZE),
-                                TILE_SIZE, TILE_SIZE, chunk->tiles[row][col]);
+                            TileType tileType = chunk->tiles[row][col];
+
+                            DrawTextureRec(
+                                tileSheet,
+                                tileRects[tileType],  // rectangle for this tile type
+                                (Vector2){ 
+                                    (chunkX * CHUNK_SIZE + col) * TILE_SIZE, 
+                                    (chunkY * CHUNK_SIZE + row) * TILE_SIZE
+                                },
+                                WHITE
+                            );
                         }
                     }
                 }

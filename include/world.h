@@ -16,16 +16,18 @@ typedef struct WorldData
 } WorldData;
 
 typedef struct Chunk {
-    Color tiles[CHUNK_SIZE][CHUNK_SIZE];
+    int tiles[CHUNK_SIZE][CHUNK_SIZE];
     bool isLoaded;
 } Chunk;
 
+
 extern Texture2D tileSheet;
-const int TILE_PIXELS;
+extern const int TILE_PIXELS;
+extern Rectangle tileRects[];
 
 // Tile mapping (index into the sprite sheet)
-enum TileType {
-    TILE_WATER,
+typedef enum {
+    TILE_WATER_DEEP,
     TILE_SHORE,
     TILE_SAND,
     TILE_GRASS,
@@ -33,9 +35,7 @@ enum TileType {
     TILE_MOUNTAIN,
     TILE_SNOW,
     TILE_COUNT
-};
-
-Rectangle tileRects[TILE_COUNT];
+} TileType;
 
 void initTileSheet();
 void initRandom();
