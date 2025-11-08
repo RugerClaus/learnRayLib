@@ -1,0 +1,1 @@
+gcc src/main.c src/player.c src/world.c -o game -lraylib -lm -lpthread -ldl -lrt -lX11
