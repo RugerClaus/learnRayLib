@@ -160,7 +160,7 @@ int main(void)
     const int screenHeight = 768;
     const int tileSize = TILE_SIZE;
 
-    InitWindow(screenWidth, screenHeight, "Infinite Terrain with Chunks - Raylib C17");
+    InitWindow(screenWidth, screenHeight, "Distant Realms Raylib");
     SetTargetFPS(60);
     initWorld();
 
@@ -232,11 +232,11 @@ int main(void)
         
         EndMode2D();
 
+        DrawPlayer(&player, screenWidth, screenHeight, tileSize);
+        
         if (game.isPaused) {
             DrawText("PAUSED", screenWidth / 2 - MeasureText("PAUSED", 40) / 2, screenHeight / 2 - 20, 40, RED);
         }
-        
-        DrawPlayer(&player, screenWidth, screenHeight, tileSize);
         
         if(debug.isEnabled)
         {
