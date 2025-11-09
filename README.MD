@@ -42,3 +42,5 @@ If you want to run this, make sure you have raylib installed on your computer, t
 bash compile.sh
 
 ```
+
+DISCLAIMER: I am not good at fancy algorithms, and my butchered noise algorithm has been pulled from a bunch of nonsense sources. However it does work how I need it to, so you can bite me. Everyone needs to start somewhere and I will say most programming I've done does not include this dense forest of math. But it has been lots of fun to mess with
