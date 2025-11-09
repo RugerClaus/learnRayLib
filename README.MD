@@ -9,3 +9,14 @@ began implementing terrain features from sprites. still figuring that one out, w
 
 scratch that, I made a small tile sheet and implemented the textures for the terrain gen
 it totally works ;)
+
+implemented multi-layered perlin noise system
+
+generates biomes based on elevation and temperature. 
+
+now has a 5x5 mapped tilesheet that is ready for expansion.
+
+renders tiles based on biome. each biome has its own row in the tile sheet
+from left to right is elevation. the lower elevation tiles are on the left and the higher on the right
+
+thanks for coming to my TED talk

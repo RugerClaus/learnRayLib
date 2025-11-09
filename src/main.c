@@ -153,6 +153,18 @@ void UpdateCameraZoom(Camera2D* camera)
     if (IsKeyDown(KEY_KP_0)) camera->zoom = 1.0f;
 }
 
+const char* biomeName(Biome biome) {
+    switch(biome)
+    {
+        case BIOME_OCEAN: return "Ocean";
+        case BIOME_BEACH: return "Beach";
+        case BIOME_PLAINS: return "Plains";
+        case BIOME_DESERT: return "Desert"; 
+        case BIOME_MOUNTAINS: return "Mountains";
+        default: return "Unknown";
+    }
+}
+
 int main(void)
 {
     // Initialize window
@@ -238,6 +250,8 @@ int main(void)
             DrawText("PAUSED", screenWidth / 2 - MeasureText("PAUSED", 40) / 2, screenHeight / 2 - 20, 40, RED);
         }
         
+        
+        
         if(debug.isEnabled)
         {
             char positionText[100];
@@ -251,6 +265,15 @@ int main(void)
             char worldSeedText[50];
             sprintf(worldSeedText, "World Seed: %d", getWorldSeed());
             DrawText(worldSeedText, 10, 50, 20, BLACK);
+
+            const char* biome = biomeName(getBiomeAt((int)player.position.x / TILE_SIZE, (int)player.position.y / TILE_SIZE));
+            char biomeText[50];
+            sprintf(biomeText, "Biome: %s", biome);
+            DrawText(biomeText, 10, 70, 20, BLACK);
+
+            char temperature[50];
+            sprintf(temperature, "Current Temperature: %.2f", getTemperatureAt((int)player.position.x / TILE_SIZE, (int)player.position.y / TILE_SIZE));
+            DrawText(temperature,10,90,20, BLACK);
             
             DrawFPS(678, 5);
         }
