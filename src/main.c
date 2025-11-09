@@ -120,8 +120,8 @@ void handleInput(Player* player, Game* game, Debug* debug, float dt)
         if (IsKeyDown(KEY_W)) player->intent |= 8;
         if (IsKeyPressed(KEY_BACKSLASH))
         {
-            player->position.x = 100*TILE_SIZE;
-            player->position.y = 100*TILE_SIZE;
+            player->base.position.x = 100*TILE_SIZE;
+            player->base.position.y = 100*TILE_SIZE;
         }
         if (IsKeyReleased(KEY_D) && player->intent == 1) player->intent = 0;
         if (IsKeyReleased(KEY_A) && player->intent == 2) player->intent = 0;
@@ -143,8 +143,17 @@ void handleInput(Player* player, Game* game, Debug* debug, float dt)
 }
 
 void UpdateCameraPosition(Camera2D* camera, Player* player) {
-    camera->target = (Vector2){ player->position.x, player->position.y };
+    // Follow the player
+    camera->target = (Vector2){ player->base.position.x, player->base.position.y };
+    
+    // Optionally, keep the camera centered on the player
+    camera->offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    player->offset = (Vector2){ camera->target.x - camera->offset.x, camera->target.y - camera->offset.y };
+
+    printf("Camera Target: (%.2f, %.2f)\n", camera->target.x, camera->target.y);
 }
+
+
 
 void UpdateCameraZoom(Camera2D* camera)
 {
@@ -183,20 +192,12 @@ int main(void)
     camera.zoom = 1.0f;
     
 
-    int startXTile = 100;
-    int startYTile = 100;
     
 
     
-    Player player = { 
-        .position = {(float)(startXTile * tileSize), (float)(startYTile * tileSize)},
-        .speed = 200.0f,
-        .color = GREEN,
-        .default_color = BLUE,
-        .state = 0,
-        .intent = 0,
-        .radius = 12.0f
-    };
+
+    Player player = createPlayer((Vector2){100.0f * tileSize, 100.0f * tileSize}, 200.0f, GREEN, 12.0f);
+    player.base.update = updatePlayer;
 
     Game game = {
         .isPaused = false,
@@ -215,10 +216,11 @@ int main(void)
         float halfViewH = (screenHeight * 0.5f) / camera.zoom;
         if(!game.isPaused)
         {
-            UpdatePlayer(&player, dt);
+            
             UpdateCameraPosition(&camera, &player);
             UpdateCameraZoom(&camera);
             UpdateChunks(&player);
+            updateEntity((Entity*)&player,dt);
         }
         
         handleInput(&player, &game, &debug, dt);
@@ -229,10 +231,10 @@ int main(void)
         BeginMode2D(camera);
         DrawChunks(&player, &settings);
 
-        int startRow = (int)floor(player.position.y / tileSize - halfViewH / tileSize) - 1;
-        int endRow   = (int)ceil (player.position.y / tileSize + halfViewH / tileSize) + 1;
-        int startCol = (int)floor(player.position.x / tileSize - halfViewW / tileSize) - 1;
-        int endCol   = (int)ceil (player.position.x / tileSize + halfViewW / tileSize) + 1;
+        int startRow = (int)floor(player.base.position.y / tileSize - halfViewH / tileSize) - 1;
+        int endRow   = (int)ceil (player.base.position.y / tileSize + halfViewH / tileSize) + 1;
+        int startCol = (int)floor(player.base.position.x / tileSize - halfViewW / tileSize) - 1;
+        int endCol   = (int)ceil (player.base.position.x / tileSize + halfViewW / tileSize) + 1;
         if(debug.showTileOutlines)
         {
             DrawTileOutlines(startRow, endRow, startCol, endCol, tileSize);
@@ -244,7 +246,7 @@ int main(void)
         
         EndMode2D();
 
-        DrawPlayer(&player, screenWidth, screenHeight, tileSize);
+        drawPlayer((Entity*)&player);
         
         if (game.isPaused) {
             DrawText("PAUSED", screenWidth / 2 - MeasureText("PAUSED", 40) / 2, screenHeight / 2 - 20, 40, RED);
@@ -255,7 +257,7 @@ int main(void)
         if(debug.isEnabled)
         {
             char positionText[100];
-            sprintf(positionText, "Grid Position: (%.2f, %.2f)", player.gridX, player.gridY);
+            sprintf(positionText, "Grid Position: (%.2f, %.2f)", player.base.position.x/TILE_SIZE, player.base.position.y/TILE_SIZE);
             DrawText(positionText, 10, 10, 20, BLACK);
 
             char renderDistanceText[50];
@@ -266,13 +268,13 @@ int main(void)
             sprintf(worldSeedText, "World Seed: %d", getWorldSeed());
             DrawText(worldSeedText, 10, 50, 20, BLACK);
 
-            const char* biome = biomeName(getBiomeAt((int)player.position.x / TILE_SIZE, (int)player.position.y / TILE_SIZE));
+            const char* biome = biomeName(getBiomeAt((int)player.base.position.x / TILE_SIZE, (int)player.base.position.y / TILE_SIZE));
             char biomeText[50];
             sprintf(biomeText, "Biome: %s", biome);
             DrawText(biomeText, 10, 70, 20, BLACK);
 
             char temperature[50];
-            sprintf(temperature, "Current Temperature: %.2f", getTemperatureAt((int)player.position.x / TILE_SIZE, (int)player.position.y / TILE_SIZE));
+            sprintf(temperature, "Current Temperature: %.2f", getTemperatureAt((int)player.base.position.x / TILE_SIZE, (int)player.base.position.y / TILE_SIZE));
             DrawText(temperature,10,90,20, BLACK);
             
             DrawFPS(678, 5);
@@ -288,6 +290,7 @@ int main(void)
                 toggleTileOutlines(&debug);
             }
         }
+
         EndDrawing();
     }
 

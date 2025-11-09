@@ -1,22 +1,22 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "entity.h"
 #include <raylib.h>
 
 typedef struct Player {
-    Vector2 position;
+    Entity base;
     float speed;
     Color color;
     Color default_color;
-    float gridX;
-    float gridY;
     float radius;
     int state;
     int intent;
+    Vector2 offset;
 } Player;
 
-void MovePlayer(Player* player, float dt);
-void UpdatePlayer(Player* player, float dt);
-void DrawPlayer(Player* player, int screenWidth, int screenHeight, int tileSize);
+void updatePlayer(Entity* self, float dt);
+void drawPlayer(Entity* self);
+Player createPlayer(Vector2 position, float speed, Color color, float radius);
 
 #endif // PLAYER_H

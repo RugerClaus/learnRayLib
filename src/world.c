@@ -181,8 +181,8 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
 
 
 void UpdateChunks(Player* player) {
-    int playerChunkX = (int)(player->position.x / (CHUNK_SIZE * TILE_SIZE));
-    int playerChunkY = (int)(player->position.y / (CHUNK_SIZE * TILE_SIZE));
+    int playerChunkX = (int)(player->base.position.x / (CHUNK_SIZE * TILE_SIZE));
+    int playerChunkY = (int)(player->base.position.y / (CHUNK_SIZE * TILE_SIZE));
 
     // Check surrounding chunks (3x3 area)
     for (int dx = -1; dx <= 1; dx++) {
@@ -203,8 +203,8 @@ void UpdateChunks(Player* player) {
 }
 
 void DrawChunks(Player* player, Settings* settings) {
-    int playerChunkX = (int)(player->position.x / (CHUNK_SIZE * TILE_SIZE));
-    int playerChunkY = (int)(player->position.y / (CHUNK_SIZE * TILE_SIZE));
+    int playerChunkX = (int)(player->base.position.x / (CHUNK_SIZE * TILE_SIZE));
+    int playerChunkY = (int)(player->base.position.y / (CHUNK_SIZE * TILE_SIZE));
 
     for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
         for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {

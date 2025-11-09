@@ -25,3 +25,5 @@ thanks for coming to my TED talk
 experimenting with biome blending and temperature calculations.
 
 implemented fractalnoise to calculate biomes and temperature
+
+integrated player into entity system. began setting up an ECS with basic render handling. this is to prepare for my addition of entities. 
