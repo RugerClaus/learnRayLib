@@ -20,3 +20,8 @@ renders tiles based on biome. each biome has its own row in the tile sheet
 from left to right is elevation. the lower elevation tiles are on the left and the higher on the right
 
 thanks for coming to my TED talk
+
+
+experimenting with biome blending and temperature calculations.
+
+implemented fractalnoise to calculate biomes and temperature

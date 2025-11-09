@@ -80,13 +80,13 @@ void initWorld() {
 // A simple pseudo-random hash function
 static float Noise2D(int x, int y) {
     int n = x + y * 57 + worldData.seed * 131;
-    n = (n << 13) ^ n;
-    return (1.0f - ((n * (n * n * 81722 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f);
+    n = (n << 19) ^ n;
+    return (1.0f - ((n * (n * n * 21 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f);
 }
 
-// Smooth interpolation between two values
 static float Lerp(float a, float b, float t) {
-    return a + t * (b - a);
+    float mu2 = (1.0f - cos(t * 3.14159f)) / 2.0f;
+    return a * (1.0f - mu2) + b * mu2;
 }
 
 // Generate smooth noise by interpolating between Noise2D grid points
@@ -106,6 +106,21 @@ static float SmoothNoise(float x, float y) {
     return Lerp(i1, i2, fracY);
 }
 
+float FractalNoise(float x, float y, int octaves) {
+    float total = 0.0f;
+    float frequency = 1.0f;
+    float amplitude = 1.0f;
+    
+    // Loop over each octave
+    for (int i = 0; i < octaves; ++i) {
+        total += SmoothNoise(x * frequency, y * frequency) * amplitude;
+        frequency *= 2.0f;  // Increase frequency (higher detail)
+        amplitude *= 0.5f;  // Decrease amplitude (lower intensity)
+    }
+    
+    return total;
+}
+
 void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
     for (int row = 0; row < CHUNK_SIZE; row++) {
         for (int col = 0; col < CHUNK_SIZE; col++) {
@@ -115,8 +130,8 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
             float nx = worldX / 100.0f;
             float ny = worldY / 100.0f;
 
-            float height = (SmoothNoise(nx, ny) + 1.0f) / 2.0f;
-            float tempNorm = (SmoothNoise(nx + WORLD_OFFSET, ny + WORLD_OFFSET) + 1.0f) / 2.0f;
+            float height = (FractalNoise(nx, ny, 4) + 1.0f) / 2.0f;
+            float tempNorm = (FractalNoise(nx + WORLD_OFFSET, ny + WORLD_OFFSET,2) + 1.0f) / 2.0f;
 
             // Map normalized temp to Celsius
             float minTemp = -10.0f;

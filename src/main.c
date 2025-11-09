@@ -277,6 +277,17 @@ int main(void)
             
             DrawFPS(678, 5);
         }
+        else
+        {
+            if(debug.showChunkBorders)
+            {
+                toggleChunkBorders(&debug);
+            }
+            else if (debug.showTileOutlines)
+            {
+                toggleTileOutlines(&debug);
+            }
+        }
         EndDrawing();
     }
 
