@@ -10,9 +10,11 @@ typedef struct Player {
     Color color;
     Color default_color;
     float radius;
-    int state;
     int intent;
     Vector2 offset;
+    int health;
+    int level;
+    int exp;
 } Player;
 
 void updatePlayer(Entity* self, float dt);

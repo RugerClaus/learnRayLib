@@ -8,6 +8,7 @@
         "world.h": "c",
         "time.h": "c",
         "stdlib.h": "c",
-        "entity.h": "c"
+        "entity.h": "c",
+        "appstate.h": "c"
     }
 }

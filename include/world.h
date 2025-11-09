@@ -6,7 +6,7 @@
 #include "player.h"
 #include "settings.h"
 
-#define CHUNK_SIZE 32
+#define CHUNK_SIZE 16
 #define TILE_SIZE 16
 #define WORLD_OFFSET 1000
 #define TILES_PER_BIOME 5
@@ -63,7 +63,7 @@ void initWorld();
 int getWorldSeed();
 int randRange(int min, int max);
 void GenerateChunk(Chunk* chunk, int chunkX, int chunkY);
-void UpdateChunks(Player* player);
+void UpdateChunks(Player* player, Settings* settings);
 void DrawChunks(Player* player, Settings* settings);
 float getTemperatureAt();
 Biome getBiomeAt();

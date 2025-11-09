@@ -180,13 +180,13 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
 }
 
 
-void UpdateChunks(Player* player) {
+void UpdateChunks(Player* player, Settings* settings) {
     int playerChunkX = (int)(player->base.position.x / (CHUNK_SIZE * TILE_SIZE));
     int playerChunkY = (int)(player->base.position.y / (CHUNK_SIZE * TILE_SIZE));
 
-    // Check surrounding chunks (3x3 area)
-    for (int dx = -1; dx <= 1; dx++) {
-        for (int dy = -1; dy <= 1; dy++) {
+    // Check surrounding chunks (3x3 area) for loading
+    for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
+        for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
             int chunkX = playerChunkX + dx;
             int chunkY = playerChunkY + dy;
 
@@ -194,13 +194,34 @@ void UpdateChunks(Player* player) {
             if (chunkX >= 0 && chunkY >= 0 && chunkX < 100 && chunkY < 100) {
                 Chunk* chunk = &chunks[chunkX][chunkY];
                 if (!chunk->isLoaded) {
-                    GenerateChunk(chunk,chunkX,chunkY); // Generate chunk if not done
+                    GenerateChunk(chunk, chunkX, chunkY); // Generate chunk if not loaded
                 }
             }
         }
     }
+
+
+    for (int chunkX = 0; chunkX < 100; chunkX++) {
+        for (int chunkY = 0; chunkY < 100; chunkY++) {
+            Chunk* chunk = &chunks[chunkX][chunkY];
+
+            // Check if chunk is out of render range
+            int distX = abs(chunkX - playerChunkX);
+            int distY = abs(chunkY - playerChunkY);
+            if (distX > settings->renderDistance || distY > settings->renderDistance) {
+                if (chunk->isLoaded) {
+                    // Unload the chunk by setting the isLoaded flag to false
+                    chunk->isLoaded = false;
+                    printf("Unloading chunk: (%d, %d)\n", chunkX, chunkY); // Optionally print the unloaded chunk for debugging
+                }
+            }
+        }
+    }
+
+    // Print current chunk position for debugging
     printf("Current chunk: (%d, %d)\n", playerChunkX, playerChunkY);
 }
+
 
 void DrawChunks(Player* player, Settings* settings) {
     int playerChunkX = (int)(player->base.position.x / (CHUNK_SIZE * TILE_SIZE));

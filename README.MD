@@ -27,3 +27,18 @@ experimenting with biome blending and temperature calculations.
 implemented fractalnoise to calculate biomes and temperature
 
 integrated player into entity system. began setting up an ECS with basic render handling. this is to prepare for my addition of entities. 
+
+added at app state finite state machine pattern to keep track of basic application states IE GAME_ACTIVE, MAIN_MENU, QUIT. This helps control flow and minimizes input bugs at different parts of the program.
+
+when in game, a small overlay is displayed for the player indicating health, level, and exp count. These will be future systems. This will be a free roam game, but i'm not sure beyond that. 
+
+Next step is to define more boundaries for the player and begin working on some static entities.
+
+unlike the framework I'm building in pygame, the debug overlay is not accessible from anywhere within this application, soley from the game state.
+
+If you want to run this, make sure you have raylib installed on your computer, then run:
+
+```
+bash compile.sh
+
+```

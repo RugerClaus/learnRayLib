@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <math.h>
 
+#include "../include/state/appstate.h"
 #include "../include/player.h"
 #include "../include/world.h"
 #include "../include/settings.h"
@@ -21,7 +22,7 @@ typedef struct Debug
 
 Settings settings = 
 {
-    .renderDistance = 5,
+    .renderDistance = 2,
 };
 
 void toggleTileOutlines(Debug* debug)
@@ -39,13 +40,13 @@ void toggleTileOutlines(Debug* debug)
 
 void toggleRenderDistance(Settings* settings)
 {
-    if(settings->renderDistance < 10)
+    if(settings->renderDistance <= 4)
     {
         settings->renderDistance += 1;
     }
     else
     {
-        settings->renderDistance = 5;
+        settings->renderDistance = 1;
     }
 }
 
@@ -109,36 +110,46 @@ void togglePause(Game* game)
     }
 }
 
-void handleInput(Player* player, Game* game, Debug* debug, float dt)
+void handleInput(Player* player, Game* game, Debug* debug, float dt, StateManager* sm)
 {
-    if(!game->isPaused)
+
+    if (isAppState(sm,MAIN_MENU))
     {
-        player->intent = 0;
-        if (IsKeyDown(KEY_D)) player->intent |= 1;
-        if (IsKeyDown(KEY_A)) player->intent |= 2;
-        if (IsKeyDown(KEY_S)) player->intent |= 4;
-        if (IsKeyDown(KEY_W)) player->intent |= 8;
-        if (IsKeyPressed(KEY_BACKSLASH))
-        {
-            player->base.position.x = 100*TILE_SIZE;
-            player->base.position.y = 100*TILE_SIZE;
-        }
-        if (IsKeyReleased(KEY_D) && player->intent == 1) player->intent = 0;
-        if (IsKeyReleased(KEY_A) && player->intent == 2) player->intent = 0;
-        if (IsKeyReleased(KEY_S) && player->intent == 4) player->intent = 0;
-        if (IsKeyReleased(KEY_W) && player->intent == 8) player->intent = 0;
-        if (IsKeyPressed(KEY_P)) togglePause(game);
-        if (IsKeyPressed(KEY_F3)) debug->isEnabled = !debug->isEnabled;
-        if (debug->isEnabled)
-        {
-            if (IsKeyPressed(KEY_T)) toggleTileOutlines(debug);
-            if (IsKeyPressed(KEY_C)) toggleChunkBorders(debug);
-        }
-        if (IsKeyPressed(KEY_F)) toggleRenderDistance(&settings);
+        if (IsKeyPressed(KEY_SPACE)) setAppState(sm,GAME_ACTIVE);
     }
-    else
+
+    else if(isAppState(sm, GAME_ACTIVE))
     {
-        if (IsKeyPressed(KEY_P)) togglePause(game);
+        if(!game->isPaused)
+        {
+            player->intent = 0;
+            if (IsKeyDown(KEY_D)) player->intent |= 1;
+            if (IsKeyDown(KEY_A)) player->intent |= 2;
+            if (IsKeyDown(KEY_S)) player->intent |= 4;
+            if (IsKeyDown(KEY_W)) player->intent |= 8;
+            if (IsKeyPressed(KEY_BACKSLASH))
+            {
+                player->base.position.x = 100*TILE_SIZE;
+                player->base.position.y = 100*TILE_SIZE;
+            }
+            if (IsKeyReleased(KEY_D) && player->intent == 1) player->intent = 0;
+            if (IsKeyReleased(KEY_A) && player->intent == 2) player->intent = 0;
+            if (IsKeyReleased(KEY_S) && player->intent == 4) player->intent = 0;
+            if (IsKeyReleased(KEY_W) && player->intent == 8) player->intent = 0;
+            
+            if (IsKeyPressed(KEY_F3)) debug->isEnabled = !debug->isEnabled;
+            if (debug->isEnabled)
+            {
+                if (IsKeyPressed(KEY_T)) toggleTileOutlines(debug);
+                if (IsKeyPressed(KEY_C)) toggleChunkBorders(debug);
+            }
+            if (IsKeyPressed(KEY_F)) toggleRenderDistance(&settings);
+        }
+        else
+        {
+            if (IsKeyPressed(KEY_M)) setAppState(sm,MAIN_MENU);
+        }
+    if (IsKeyPressed(KEY_ESCAPE)) togglePause(game);
     }
 }
 
@@ -174,20 +185,48 @@ const char* biomeName(Biome biome) {
     }
 }
 
+void drawDebug(Player* player)
+{
+    char positionText[100];
+            sprintf(positionText, "Grid Position: (%.2f, %.2f)", player->base.position.x/TILE_SIZE, player->base.position.y/TILE_SIZE);
+            DrawText(positionText, 10, 10, 20, BLACK);
+
+            char renderDistanceText[50];
+            sprintf(renderDistanceText, "Render Distance: %d", settings.renderDistance);
+            DrawText(renderDistanceText, 10, 30, 20, BLACK);
+
+            char worldSeedText[50];
+            sprintf(worldSeedText, "World Seed: %d", getWorldSeed());
+            DrawText(worldSeedText, 10, 50, 20, BLACK);
+
+            const char* biome = biomeName(getBiomeAt((int)player->base.position.x / TILE_SIZE, (int)player->base.position.y / TILE_SIZE));
+            char biomeText[50];
+            sprintf(biomeText, "Biome: %s", biome);
+            DrawText(biomeText, 10, 70, 20, BLACK);
+
+            char temperature[50];
+            sprintf(temperature, "Current Temperature: %.2f", getTemperatureAt((int)player->base.position.x / TILE_SIZE, (int)player->base.position.y / TILE_SIZE));
+            DrawText(temperature,10,90,20, BLACK);
+            
+            DrawFPS(GetScreenWidth()-90, 5);
+}
+
 int main(void)
 {
     // Initialize window
-    const int screenWidth = 768;
-    const int screenHeight = 768;
+    const int defaultScreenWidth = 768;
+    const int defaultScreenHeight = 768;
     const int tileSize = TILE_SIZE;
 
-    InitWindow(screenWidth, screenHeight, "Distant Realms Raylib");
+    InitWindow(defaultScreenWidth, defaultScreenHeight, "Distant Realms Raylib");
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+    SetExitKey(KEY_F10);
     SetTargetFPS(60);
     initWorld();
 
     // Setup camera
     Camera2D camera = { 0 };
-    camera.offset = (Vector2){ screenWidth / 2.0f, screenHeight / 2.0f };
+    camera.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
     
@@ -209,87 +248,100 @@ int main(void)
         .showChunkBorders = false
     };
 
+    StateManager sm = { MAIN_MENU, -1};
+    initStateManager(&sm);
+
     while (!WindowShouldClose())
     {
+        
         float dt = GetFrameTime();
-        float halfViewW = (screenWidth * 0.5f) / camera.zoom;
-        float halfViewH = (screenHeight * 0.5f) / camera.zoom;
-        if(!game.isPaused)
+        float halfViewW = (GetScreenWidth() * 0.5f) / camera.zoom;
+        float halfViewH = (GetScreenHeight() * 0.5f) / camera.zoom;
+        handleInput(&player, &game, &debug, dt,&sm);
+        
+        if (isAppState(&sm,MAIN_MENU))
         {
+            BeginDrawing();
+            ClearBackground(BLACK);
+
+            char welcome[50];
+            sprintf(welcome, "Welcome to the game, Press Space to continue");
+
+            int textWidth = MeasureText(welcome, 20);
+            int textHeight = 20;
+
+            int x = (GetScreenWidth() - textWidth) / 2;
+            int y = (GetScreenHeight() - textHeight) / 2;
+
+            DrawText(welcome, x, y, 20, WHITE);
+            EndDrawing();
+        }
+        else if (isAppState(&sm,GAME_ACTIVE))
+        {
+            if(!game.isPaused)
+            {
+                
+                UpdateCameraPosition(&camera, &player);
+                UpdateCameraZoom(&camera);
+                UpdateChunks(&player, &settings);
+                updateEntity((Entity*)&player,dt);
+            }
             
-            UpdateCameraPosition(&camera, &player);
-            UpdateCameraZoom(&camera);
-            UpdateChunks(&player);
-            updateEntity((Entity*)&player,dt);
-        }
-        
-        handleInput(&player, &game, &debug, dt);
+            BeginDrawing();
+            ClearBackground(BLUE);
+            BeginMode2D(camera);
+            DrawChunks(&player, &settings);
 
-        BeginDrawing();
-        ClearBackground(BLUE);
-        
-        BeginMode2D(camera);
-        DrawChunks(&player, &settings);
-
-        int startRow = (int)floor(player.base.position.y / tileSize - halfViewH / tileSize) - 1;
-        int endRow   = (int)ceil (player.base.position.y / tileSize + halfViewH / tileSize) + 1;
-        int startCol = (int)floor(player.base.position.x / tileSize - halfViewW / tileSize) - 1;
-        int endCol   = (int)ceil (player.base.position.x / tileSize + halfViewW / tileSize) + 1;
-        if(debug.showTileOutlines)
-        {
-            DrawTileOutlines(startRow, endRow, startCol, endCol, tileSize);
-        }
-        if(debug.showChunkBorders)
-        {
-            DrawChunkBorders(startRow, endRow, startCol, endCol, tileSize);
-        }
-        
-        EndMode2D();
-
-        drawPlayer((Entity*)&player);
-        
-        if (game.isPaused) {
-            DrawText("PAUSED", screenWidth / 2 - MeasureText("PAUSED", 40) / 2, screenHeight / 2 - 20, 40, RED);
-        }
-        
-        
-        
-        if(debug.isEnabled)
-        {
-            char positionText[100];
-            sprintf(positionText, "Grid Position: (%.2f, %.2f)", player.base.position.x/TILE_SIZE, player.base.position.y/TILE_SIZE);
-            DrawText(positionText, 10, 10, 20, BLACK);
-
-            char renderDistanceText[50];
-            sprintf(renderDistanceText, "Render Distance: %d", settings.renderDistance);
-            DrawText(renderDistanceText, 10, 30, 20, BLACK);
-
-            char worldSeedText[50];
-            sprintf(worldSeedText, "World Seed: %d", getWorldSeed());
-            DrawText(worldSeedText, 10, 50, 20, BLACK);
-
-            const char* biome = biomeName(getBiomeAt((int)player.base.position.x / TILE_SIZE, (int)player.base.position.y / TILE_SIZE));
-            char biomeText[50];
-            sprintf(biomeText, "Biome: %s", biome);
-            DrawText(biomeText, 10, 70, 20, BLACK);
-
-            char temperature[50];
-            sprintf(temperature, "Current Temperature: %.2f", getTemperatureAt((int)player.base.position.x / TILE_SIZE, (int)player.base.position.y / TILE_SIZE));
-            DrawText(temperature,10,90,20, BLACK);
-            
-            DrawFPS(678, 5);
-        }
-        else
-        {
+            int startRow = (int)floor(player.base.position.y / tileSize - halfViewH / tileSize) - 1;
+            int endRow   = (int)ceil (player.base.position.y / tileSize + halfViewH / tileSize) + 1;
+            int startCol = (int)floor(player.base.position.x / tileSize - halfViewW / tileSize) - 1;
+            int endCol   = (int)ceil (player.base.position.x / tileSize + halfViewW / tileSize) + 1;
+            if(debug.showTileOutlines)
+            {
+                DrawTileOutlines(startRow, endRow, startCol, endCol, tileSize);
+            }
             if(debug.showChunkBorders)
             {
-                toggleChunkBorders(&debug);
+                DrawChunkBorders(startRow, endRow, startCol, endCol, tileSize);
             }
-            else if (debug.showTileOutlines)
+            
+            EndMode2D();
+
+            drawPlayer((Entity*)&player);
+            
+            if (game.isPaused) {
+                char pauseText[50];
+                sprintf(pauseText, "PAUSED");
+
+                int textWidth = MeasureText(pauseText, 20);
+                int textHeight = 20;
+
+                int x = (GetScreenWidth() - textWidth) / 2;
+                int y = (GetScreenHeight() - textHeight) / 2;
+
+                DrawText(pauseText, x, y, 40, RED);
+            }
+            
+            
+            
+            if(debug.isEnabled)
             {
-                toggleTileOutlines(&debug);
+                drawDebug(&player);
+            }
+            else
+            {
+                if(debug.showChunkBorders)
+                {
+                    toggleChunkBorders(&debug);
+                }
+                else if (debug.showTileOutlines)
+                {
+                    toggleTileOutlines(&debug);
+                }
             }
         }
+
+        else if (isAppState(&sm,QUIT)) CloseWindow();
 
         EndDrawing();
     }
