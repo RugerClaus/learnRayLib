@@ -5,7 +5,7 @@
 
 void MovePlayer(Player* player, float dt)
 {
-    if (player->intent & 1)
+    if (player->intent & 1) // Moving Right
     {
         
         player->base.position.x += player->speed * dt;
@@ -69,8 +69,6 @@ void drawPlayer(Entity* self)
 {
     Player* player = (Player*)self;
     
-    // Just draw the player based on the player's position
-    // Use camera offset during drawing
     Vector2 drawPos = (Vector2){
         player->base.position.x - player->offset.x, 
         player->base.position.y - player->offset.y
@@ -79,6 +77,24 @@ void drawPlayer(Entity* self)
     DrawCircleV(drawPos, player->radius, player->color);
 
     drawUI(player);
+}
+
+void handlePlayerInput(Player* player, int TILE_SIZE)
+{
+    player->intent = 0;
+    if (IsKeyDown(KEY_D)) player->intent |= 1;
+    if (IsKeyDown(KEY_A)) player->intent |= 2;
+    if (IsKeyDown(KEY_S)) player->intent |= 4;
+    if (IsKeyDown(KEY_W)) player->intent |= 8;
+    if (IsKeyPressed(KEY_BACKSLASH))
+    {
+        player->base.position.x = 100*TILE_SIZE;
+        player->base.position.y = 100*TILE_SIZE;
+    }
+    if (IsKeyReleased(KEY_D) && player->intent == 1) player->intent = 0;
+    if (IsKeyReleased(KEY_A) && player->intent == 2) player->intent = 0;
+    if (IsKeyReleased(KEY_S) && player->intent == 4) player->intent = 0;
+    if (IsKeyReleased(KEY_W) && player->intent == 8) player->intent = 0;
 }
 
 

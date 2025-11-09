@@ -11,6 +11,7 @@ typedef struct Game
 {
     bool isPaused;
     int renderDistance;
+    float zoom;
 } Game;
 
 typedef struct Debug
@@ -79,7 +80,6 @@ void DrawChunkBorders(int startRow, int endRow, int startCol, int endCol, int ti
 {
     int chunkPixelSize = CHUNK_SIZE * tileSize;
 
-    // Convert from tile coordinates to chunk coordinates
     int startChunkX = startCol / CHUNK_SIZE;
     int endChunkX   = endCol   / CHUNK_SIZE;
     int startChunkY = startRow / CHUNK_SIZE;
@@ -122,20 +122,14 @@ void handleInput(Player* player, Game* game, Debug* debug, float dt, StateManage
     {
         if(!game->isPaused)
         {
-            player->intent = 0;
-            if (IsKeyDown(KEY_D)) player->intent |= 1;
-            if (IsKeyDown(KEY_A)) player->intent |= 2;
-            if (IsKeyDown(KEY_S)) player->intent |= 4;
-            if (IsKeyDown(KEY_W)) player->intent |= 8;
-            if (IsKeyPressed(KEY_BACKSLASH))
+            handlePlayerInput(player, TILE_SIZE);
+            if (IsKeyPressed(KEY_R)) 
             {
-                player->base.position.x = 100*TILE_SIZE;
-                player->base.position.y = 100*TILE_SIZE;
+                Vector2 safePos = findSafeSpawn();
+                player->base.position = safePos;
+                if (getTileAt((int)safePos.x, (int)safePos.y));
+                printf("Player repositioned to safe spawn at (%.2f, %.2f)\n", safePos.x*0.01, safePos.y*0.01);
             }
-            if (IsKeyReleased(KEY_D) && player->intent == 1) player->intent = 0;
-            if (IsKeyReleased(KEY_A) && player->intent == 2) player->intent = 0;
-            if (IsKeyReleased(KEY_S) && player->intent == 4) player->intent = 0;
-            if (IsKeyReleased(KEY_W) && player->intent == 8) player->intent = 0;
             
             if (IsKeyPressed(KEY_F3)) debug->isEnabled = !debug->isEnabled;
             if (debug->isEnabled)
@@ -154,10 +148,9 @@ void handleInput(Player* player, Game* game, Debug* debug, float dt, StateManage
 }
 
 void UpdateCameraPosition(Camera2D* camera, Player* player) {
-    // Follow the player
+
     camera->target = (Vector2){ player->base.position.x, player->base.position.y };
     
-    // Optionally, keep the camera centered on the player
     camera->offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     player->offset = (Vector2){ camera->target.x - camera->offset.x, camera->target.y - camera->offset.y };
 
@@ -170,7 +163,7 @@ void UpdateCameraZoom(Camera2D* camera)
 {
     if (IsKeyDown(KEY_KP_ADD)) camera->zoom += 0.05f;
     if (IsKeyDown(KEY_KP_SUBTRACT)) camera->zoom = fmaxf(0.5f, camera->zoom - 0.05f);
-    if (IsKeyDown(KEY_KP_0)) camera->zoom = 1.0f;
+    if (IsKeyDown(KEY_KP_0)) camera->zoom = 3.0f;
 }
 
 const char* biomeName(Biome biome) {
@@ -185,7 +178,7 @@ const char* biomeName(Biome biome) {
     }
 }
 
-void drawDebug(Player* player)
+void drawDebug(Player* player, Camera2D* camera)
 {
     char positionText[100];
             sprintf(positionText, "Grid Position: (%.2f, %.2f)", player->base.position.x/TILE_SIZE, player->base.position.y/TILE_SIZE);
@@ -207,13 +200,16 @@ void drawDebug(Player* player)
             char temperature[50];
             sprintf(temperature, "Current Temperature: %.2f", getTemperatureAt((int)player->base.position.x / TILE_SIZE, (int)player->base.position.y / TILE_SIZE));
             DrawText(temperature,10,90,20, BLACK);
+
+            char cameraZoom[50];
+            sprintf(cameraZoom, "Camera Zoom: %.2f", camera->zoom);
+            DrawText(cameraZoom,10,110,20, BLACK);
             
             DrawFPS(GetScreenWidth()-90, 5);
 }
 
 int main(void)
 {
-    // Initialize window
     const int defaultScreenWidth = 768;
     const int defaultScreenHeight = 768;
     const int tileSize = TILE_SIZE;
@@ -223,23 +219,29 @@ int main(void)
     SetExitKey(KEY_F10);
     SetTargetFPS(60);
     initWorld();
+    preloadTitleWorld(&settings);
+    InitAudioDevice();
 
-    // Setup camera
+    Music music = LoadMusicStream("assets/music/ioa.ogg");
+    PlayMusicStream(music);
+    SetMusicVolume(music, 1.0f);
+
     Camera2D camera = { 0 };
     camera.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
+    camera.zoom = 3.0f;
     
 
     
 
     
-
-    Player player = createPlayer((Vector2){100.0f * tileSize, 100.0f * tileSize}, 200.0f, GREEN, 12.0f);
+    Vector2 safePos = findSafeSpawn();
+    Player player = createPlayer(safePos, 55.0f, GREEN, 12.0f);
     player.base.update = updatePlayer;
 
     Game game = {
         .isPaused = false,
+        .zoom = 3.0f
     };
 
     Debug debug = {
@@ -258,11 +260,18 @@ int main(void)
         float halfViewW = (GetScreenWidth() * 0.5f) / camera.zoom;
         float halfViewH = (GetScreenHeight() * 0.5f) / camera.zoom;
         handleInput(&player, &game, &debug, dt,&sm);
+        UpdateMusicStream(music);
         
         if (isAppState(&sm,MAIN_MENU))
         {
+            
             BeginDrawing();
             ClearBackground(BLACK);
+            drawTitleScreenMap(&camera, dt);
+            UpdateTitleChunks(&camera, &settings); 
+            BeginMode2D(camera);
+            DrawChunksTitle(&camera, &settings);
+            EndMode2D();
 
             char welcome[50];
             sprintf(welcome, "Welcome to the game, Press Space to continue");
@@ -280,9 +289,9 @@ int main(void)
         {
             if(!game.isPaused)
             {
-                
-                UpdateCameraPosition(&camera, &player);
                 UpdateCameraZoom(&camera);
+                camera.zoom = game.zoom;
+                UpdateCameraPosition(&camera, &player);
                 UpdateChunks(&player, &settings);
                 updateEntity((Entity*)&player,dt);
             }
@@ -326,7 +335,7 @@ int main(void)
             
             if(debug.isEnabled)
             {
-                drawDebug(&player);
+                drawDebug(&player, &camera);
             }
             else
             {

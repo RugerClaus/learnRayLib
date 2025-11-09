@@ -76,54 +76,58 @@ void initWorld() {
     }
 }
 
-// perlin noise experiment functions
-// A simple pseudo-random hash function
-static float Noise2D(int x, int y) {
+static float Noise2D_Seeded(int x, int y)
+{
     int n = x + y * 57 + worldData.seed * 131;
-    n = (n << 19) ^ n;
-    return (1.0f - ((n * (n * n * 21 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0f);
+    n = (n << 13) ^ n;
+    int nn = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
+    return 1.0f - ((float)nn / 1073741824.0f);
 }
 
-static float Lerp(float a, float b, float t) {
-    float mu2 = (1.0f - cos(t * 3.14159f)) / 2.0f;
-    return a * (1.0f - mu2) + b * mu2;
+static float Lerp(float a, float b, float t)
+{
+    return a + t * (b - a);
 }
 
-// Generate smooth noise by interpolating between Noise2D grid points
-static float SmoothNoise(float x, float y) {
+static float SmoothNoise(float x, float y)
+{
     int intX = (int)x;
     int intY = (int)y;
     float fracX = x - intX;
     float fracY = y - intY;
 
-    float v1 = Noise2D(intX, intY);
-    float v2 = Noise2D(intX + 1, intY);
-    float v3 = Noise2D(intX, intY + 1);
-    float v4 = Noise2D(intX + 1, intY + 1);
+    float v1 = Noise2D_Seeded(intX, intY);
+    float v2 = Noise2D_Seeded(intX + 1, intY);
+    float v3 = Noise2D_Seeded(intX, intY + 1);
+    float v4 = Noise2D_Seeded(intX + 1, intY + 1);
 
     float i1 = Lerp(v1, v2, fracX);
     float i2 = Lerp(v3, v4, fracX);
     return Lerp(i1, i2, fracY);
 }
 
-float FractalNoise(float x, float y, int octaves) {
+static float FractalNoise(float x, float y, int octaves)
+{
     float total = 0.0f;
-    float frequency = 1.0f;
+    float frequency = 0.9f;
     float amplitude = 1.0f;
-    
-    // Loop over each octave
-    for (int i = 0; i < octaves; ++i) {
+
+    for (int i = 0; i < octaves; ++i)
+    {
         total += SmoothNoise(x * frequency, y * frequency) * amplitude;
-        frequency *= 2.0f;  // Increase frequency (higher detail)
-        amplitude *= 0.5f;  // Decrease amplitude (lower intensity)
+        frequency *= 2.0f;
+        amplitude *= 0.5f;
     }
-    
+
     return total;
 }
 
-void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
-    for (int row = 0; row < CHUNK_SIZE; row++) {
-        for (int col = 0; col < CHUNK_SIZE; col++) {
+void GenerateChunk(Chunk* chunk, int chunkX, int chunkY)
+{
+    for (int row = 0; row < CHUNK_SIZE; row++)
+    {
+        for (int col = 0; col < CHUNK_SIZE; col++)
+        {
             int worldX = chunkX * CHUNK_SIZE + col;
             int worldY = chunkY * CHUNK_SIZE + row;
 
@@ -131,41 +135,24 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
             float ny = worldY / 100.0f;
 
             float height = (FractalNoise(nx, ny, 4) + 1.0f) / 2.0f;
-            float tempNorm = (FractalNoise(nx + WORLD_OFFSET, ny + WORLD_OFFSET,2) + 1.0f) / 2.0f;
-
-            // Map normalized temp to Celsius
-            float minTemp = -10.0f;
-            float maxTemp = 40.0f;
-            float tempC = minTemp + tempNorm * (maxTemp - minTemp);
-
-            // Reduce temp with elevation
+            float tempNorm = (FractalNoise(nx + WORLD_OFFSET, ny + WORLD_OFFSET, 3) + 1.0f) / 2.0f;
+            float tempC = -10.0f + tempNorm * 50.0f;
             tempC -= height * 20.0f;
-
             chunk->temperature[row][col] = tempC;
 
-
-            // --- Determine biome using height and temperature ---
             Biome biome;
-            if (height < 0.3f) {
-                biome = BIOME_OCEAN;
-            } 
-            else if (height < 0.35f) {
-                biome = BIOME_BEACH;
-            } 
-            else if (height > 0.75f) {
-                biome = BIOME_MOUNTAINS;
-            } 
-            else {
+            if (height < 0.3f) biome = BIOME_OCEAN;
+            else if (height < 0.35f) biome = BIOME_BEACH;
+            else if (height > 0.75f) biome = BIOME_MOUNTAINS;
+            else
+            {
                 if (tempC < 0.3f) biome = BIOME_MOUNTAINS;
                 else if (tempC < 0.6f) biome = BIOME_PLAINS;
                 else biome = BIOME_DESERT;
             }
-
-            // --- Store biome ---
             chunk->biomes[row][col] = biome;
 
-            // --- Determine tile variant ---
-            float biomeHeight = (height - biomeMinHeight[biome]) / 
+            float biomeHeight = (height - biomeMinHeight[biome]) /
                                 (biomeMaxHeight[biome] - biomeMinHeight[biome]);
             if (biomeHeight < 0) biomeHeight = 0;
             if (biomeHeight > 1) biomeHeight = 1;
@@ -176,25 +163,25 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY) {
             chunk->tiles[row][col] = variant;
         }
     }
+
     chunk->isLoaded = true;
 }
+
 
 
 void UpdateChunks(Player* player, Settings* settings) {
     int playerChunkX = (int)(player->base.position.x / (CHUNK_SIZE * TILE_SIZE));
     int playerChunkY = (int)(player->base.position.y / (CHUNK_SIZE * TILE_SIZE));
 
-    // Check surrounding chunks (3x3 area) for loading
     for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
         for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
             int chunkX = playerChunkX + dx;
             int chunkY = playerChunkY + dy;
 
-            // Check chunk bounds
             if (chunkX >= 0 && chunkY >= 0 && chunkX < 100 && chunkY < 100) {
                 Chunk* chunk = &chunks[chunkX][chunkY];
                 if (!chunk->isLoaded) {
-                    GenerateChunk(chunk, chunkX, chunkY); // Generate chunk if not loaded
+                    GenerateChunk(chunk, chunkX, chunkY);
                 }
             }
         }
@@ -205,20 +192,19 @@ void UpdateChunks(Player* player, Settings* settings) {
         for (int chunkY = 0; chunkY < 100; chunkY++) {
             Chunk* chunk = &chunks[chunkX][chunkY];
 
-            // Check if chunk is out of render range
             int distX = abs(chunkX - playerChunkX);
             int distY = abs(chunkY - playerChunkY);
             if (distX > settings->renderDistance || distY > settings->renderDistance) {
                 if (chunk->isLoaded) {
-                    // Unload the chunk by setting the isLoaded flag to false
+                    
                     chunk->isLoaded = false;
-                    printf("Unloading chunk: (%d, %d)\n", chunkX, chunkY); // Optionally print the unloaded chunk for debugging
+                    printf("Unloading chunk: (%d, %d)\n", chunkX, chunkY);
                 }
             }
         }
     }
 
-    // Print current chunk position for debugging
+    
     printf("Current chunk: (%d, %d)\n", playerChunkX, playerChunkY);
 }
 
@@ -238,7 +224,7 @@ void DrawChunks(Player* player, Settings* settings) {
                     for (int row = 0; row < CHUNK_SIZE; row++) {
                         for (int col = 0; col < CHUNK_SIZE; col++) {
                             int variant = chunk->tiles[row][col];
-                            Biome biome = chunk->biomes[row][col];  // Use stored biome
+                            Biome biome = chunk->biomes[row][col];
 
                             DrawTextureRec(
                                 tileSheet,
@@ -257,21 +243,121 @@ void DrawChunks(Player* player, Settings* settings) {
     }
 }
 
+void drawTitleScreenMap(Camera2D* camera, float dt)
+{
+    static float time = 0.0f;
+    time += dt;
+
+    Vector2 center = { 250 * CHUNK_SIZE * TILE_SIZE / 2.0f, 
+                    250 * CHUNK_SIZE * TILE_SIZE / 2.0f };
+
+    float radius = 200.0f;
+    float speed = 0.5f;
+
+    camera->target.x = center.x + cosf(time * speed) * radius;
+    camera->target.y = center.y + sinf(time * speed) * radius;
+
+    
+    camera->zoom = 0.9f + 0.1f * sinf(time * 0.3f);
+
+    camera->offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+}
+
+void DrawChunksTitle(Camera2D* camera, Settings* settings)
+{
+    int camChunkX = (int)(camera->target.x / (CHUNK_SIZE * TILE_SIZE));
+    int camChunkY = (int)(camera->target.y / (CHUNK_SIZE * TILE_SIZE));
+
+    for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
+        for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
+            int chunkX = camChunkX + dx;
+            int chunkY = camChunkY + dy;
+
+            if (chunkX >= 0 && chunkY >= 0 && chunkX < 500 && chunkY < 500) {
+                Chunk* chunk = &chunks[chunkX][chunkY];
+                if (chunk->isLoaded) {
+                    for (int row = 0; row < CHUNK_SIZE; row++) {
+                        for (int col = 0; col < CHUNK_SIZE; col++) {
+                            int variant = chunk->tiles[row][col];
+                            Biome biome = chunk->biomes[row][col];
+                            DrawTextureRec(
+                                tileSheet,
+                                biomeTileRects[biome][variant],
+                                (Vector2){
+                                    (chunkX * CHUNK_SIZE + col) * TILE_SIZE,
+                                    (chunkY * CHUNK_SIZE + row) * TILE_SIZE
+                                },
+                                WHITE
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void UpdateTitleChunks(Camera2D* camera, Settings* settings)
+{
+    int camWorldX = (int)(camera->target.x);
+    int camWorldY = (int)(camera->target.y);
+
+    int centerChunkX = camWorldX / (CHUNK_SIZE * TILE_SIZE);
+    int centerChunkY = camWorldY / (CHUNK_SIZE * TILE_SIZE);
+
+    for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
+        for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
+            int chunkX = centerChunkX + dx;
+            int chunkY = centerChunkY + dy;
+
+            if (chunkX >= 0 && chunkY >= 0 && chunkX < 500 && chunkY < 500) {
+                Chunk* chunk = &chunks[chunkX][chunkY];
+                if (!chunk->isLoaded) {
+                    GenerateChunk(chunk, chunkX, chunkY);
+                }
+            }
+        }
+    }
+}
+
+void preloadTitleWorld(Settings* settings)
+{
+    int centerX = 250;
+    int centerY = 250;
+    int preloadRadius = 3;
+
+    for (int dx = -preloadRadius; dx <= preloadRadius; dx++) {
+        for (int dy = -preloadRadius; dy <= preloadRadius; dy++) {
+            int chunkX = centerX + dx;
+            int chunkY = centerY + dy;
+            Chunk* chunk = &chunks[chunkX][chunkY];
+            GenerateChunk(chunk, chunkX, chunkY);
+        }
+    }
+}
+
+Chunk* getChunk(int chunkX, int chunkY) {
+    if (chunkX < 0 || chunkY < 0 || chunkX >= 500 || chunkY >= 500) {
+        return NULL;
+    }
+
+    Chunk* chunk = &chunks[chunkX][chunkY];
+
+    if (!chunk->isLoaded) {
+        GenerateChunk(chunk, chunkX, chunkY);
+    }
+
+    return chunk;
+}
+
 float getTemperatureAt(int worldX, int worldY) {
     int chunkX = worldX / CHUNK_SIZE;
     int chunkY = worldY / CHUNK_SIZE;
     int localX = worldX % CHUNK_SIZE;
     int localY = worldY % CHUNK_SIZE;
 
-    // bounds check
-    if (chunkX < 0 || chunkY < 0 || chunkX >= 500 || chunkY >= 500) return -1;
-
-    Chunk* chunk = &chunks[chunkX][chunkY];
-
-    // make sure the chunk is generated
-    if (!chunk->isLoaded) {
-        GenerateChunk(chunk, chunkX, chunkY);
-    }
+    Chunk* chunk = getChunk(chunkX, chunkY);
+    if (!chunk) return -1.0f;
 
     return chunk->temperature[localY][localX];
 }
@@ -282,15 +368,35 @@ Biome getBiomeAt(int worldX, int worldY) {
     int localX = worldX % CHUNK_SIZE;
     int localY = worldY % CHUNK_SIZE;
 
-    // bounds check
-    if (chunkX < 0 || chunkY < 0 || chunkX >= 500 || chunkY >= 500) return BIOME_OCEAN;
-
-    Chunk* chunk = &chunks[chunkX][chunkY];
-
-    // make sure the chunk is generated
-    if (!chunk->isLoaded) {
-        GenerateChunk(chunk, chunkX, chunkY);
-    }
+    Chunk* chunk = getChunk(chunkX, chunkY);
+    if (!chunk) return BIOME_OCEAN;
 
     return chunk->biomes[localY][localX];
+}
+TileType getTileAt(int worldX, int worldY) {
+    int chunkX = worldX / CHUNK_SIZE;
+    int chunkY = worldY / CHUNK_SIZE;
+    int localX = worldX % CHUNK_SIZE;
+    int localY = worldY % CHUNK_SIZE;
+
+    Chunk* chunk = getChunk(chunkX, chunkY);
+    if (!chunk) return TILE_WATER_DEEP;
+
+    return chunk->tiles[localY][localX];
+}
+
+Vector2 findSafeSpawn() {
+    Vector2 spawn;
+    TileType tile;
+
+    do {
+        spawn.x = rand() % (64 * TILE_SIZE);
+        spawn.y = rand() % (64 * TILE_SIZE);
+
+        int tileX = (int)(spawn.x / TILE_SIZE);
+        int tileY = (int)(spawn.y / TILE_SIZE);
+        tile = getTileAt((int)spawn.x, (int)spawn.y);
+    } while(tile == TILE_WATER_DEEP || tile == TILE_SHORE);
+
+    return spawn;
 }

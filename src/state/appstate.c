@@ -10,7 +10,6 @@ void initStateManager(StateManager* sm)
     sm->appState = MAIN_MENU;
     sm->previousAppState = MAIN_MENU;
 
-    // Define allowed state transitions in the transition matrix
     for (int i = 0; i < NUM_STATES; i++) {
         for (int j = 0; j < NUM_STATES; j++) {
             sm->appAllowedTransitions[i][j] = false;
@@ -30,7 +29,6 @@ bool isTransitionAllowed(StateManager* sm, APPSTATE current_state, APPSTATE new_
             return true;
         }
     }
-    printf("fuck you");
     return false;
 }
 

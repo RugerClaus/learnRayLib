@@ -1,3 +1,12 @@
+## Game Instructions
+
+- **Press Space** to start the game (if that isn't obvious).
+- **F10** will close the program at any time.
+- Use **WASD keys** to move up, left, down, and right.
+
+
+## Sea of bullshit
+
 This is a test repo for learning Raylib using the C programming language.
 
 I'm not the most familiar with C, but I've been able to wrangle it well enough to make this dumb little demo.
@@ -44,3 +53,19 @@ bash compile.sh
 ```
 
 DISCLAIMER: I am not good at fancy algorithms, and my butchered noise algorithm has been pulled from a bunch of nonsense sources. However it does work how I need it to, so you can bite me. Everyone needs to start somewhere and I will say most programming I've done does not include this dense forest of math. But it has been lots of fun to mess with
+
+
+Added scrolling world background for title screen
+
+Added song for music that fits the theme of the place.
+
+Updated world generation to be a bit smoother with a new fractal noise function
+
+I have done my utmost to prevent the player from spawning in deep water tiles, but i've only been moderately successful so far
+Regardless i've done a decent job of preventing it. The player can only spawn in the first 64 tiles though. 
+
+implemented a getChunk function to aid in finding the biome and tile at a given position. This is also working for temperature and the pattern is good to expand it to other world properties that I procedurally generate. 
+
+Next on the agenda is preventing the player from entering water tiles (for now, I will be making a boat system or something) and generating the first entities, the static entities (trees, rocks). That tile map is included in this update.
+
+The song for the sound track is call Isle of Atmospheres

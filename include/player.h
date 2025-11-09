@@ -3,6 +3,8 @@
 
 #include "entity.h"
 #include <raylib.h>
+#include <stdio.h>
+
 
 typedef struct Player {
     Entity base;
@@ -19,6 +21,9 @@ typedef struct Player {
 
 void updatePlayer(Entity* self, float dt);
 void drawPlayer(Entity* self);
+void handlePlayerInput(Player* player, int TILE_SIZE);
+void MovePlayer(Player* player, float dt);
+void drawUI(Player* player);
 Player createPlayer(Vector2 position, float speed, Color color, float radius);
 
-#endif // PLAYER_H
+#endif

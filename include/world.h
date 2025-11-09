@@ -5,6 +5,7 @@
 #include <time.h>
 #include "player.h"
 #include "settings.h"
+#include "entity.h"
 
 #define CHUNK_SIZE 16
 #define TILE_SIZE 16
@@ -61,11 +62,19 @@ void initTileSheet();
 void initRandom();
 void initWorld();
 int getWorldSeed();
+int setWorldSeed(int seed);
 int randRange(int min, int max);
 void GenerateChunk(Chunk* chunk, int chunkX, int chunkY);
 void UpdateChunks(Player* player, Settings* settings);
 void DrawChunks(Player* player, Settings* settings);
+void drawTitleScreenMap(Camera2D* camera, float dt);
+void DrawChunksTitle(Camera2D* camera, Settings* settings);
+void UpdateTitleChunks(Camera2D* camera, Settings* settings);
+void preloadTitleWorld(Settings* settings);
+Chunk* getChunk(int chunkX, int chunkY);
 float getTemperatureAt();
 Biome getBiomeAt();
+TileType getTileAt(int worldX, int worldY);
+Vector2 findSafeSpawn();
 
 #endif
