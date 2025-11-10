@@ -141,9 +141,9 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY)
             chunk->temperature[row][col] = tempC;
 
             Biome biome;
-            if (height < 0.3f) biome = BIOME_OCEAN;
-            else if (height < 0.35f) biome = BIOME_BEACH;
-            else if (height > 0.75f) biome = BIOME_MOUNTAINS;
+            if (height < 0.4f) biome = BIOME_OCEAN;
+            else if (height < 0.45f) biome = BIOME_BEACH;
+            else if (height > 0.85f) biome = BIOME_MOUNTAINS;
             else
             {
                 if (tempC < 0.3f) biome = BIOME_MOUNTAINS;
@@ -390,8 +390,8 @@ Vector2 findSafeSpawn() {
     TileType tile;
 
     do {
-        spawn.x = rand() % (64 * TILE_SIZE);
-        spawn.y = rand() % (64 * TILE_SIZE);
+        spawn.x = rand() % (128 * TILE_SIZE);
+        spawn.y = rand() % (128 * TILE_SIZE);
 
         int tileX = (int)(spawn.x / TILE_SIZE);
         int tileY = (int)(spawn.y / TILE_SIZE);

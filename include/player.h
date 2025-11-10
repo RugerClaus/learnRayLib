@@ -17,9 +17,13 @@ typedef struct Player {
     int health;
     int level;
     int exp;
+    float temperature;
+    char biomeName[32];
+    char tileName[32];
 } Player;
 
-void updatePlayer(Entity* self, float dt);
+void DrawPlayerInfo(Player* player);
+void updatePlayer(Entity* self, float dt, int TILE_SIZE);
 void drawPlayer(Entity* self);
 void handlePlayerInput(Player* player, int TILE_SIZE);
 void MovePlayer(Player* player, float dt);

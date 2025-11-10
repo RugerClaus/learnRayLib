@@ -178,6 +178,22 @@ const char* biomeName(Biome biome) {
     }
 }
 
+const char* tileName(TileType tile)
+{
+    switch (tile)
+    {
+        case TILE_WATER_DEEP: return "Deep Water";
+        case TILE_SHORE:       return "Shore";
+        case TILE_SAND:        return "Sand";
+        case TILE_GRASS:       return "Grass";
+        case TILE_HILLS:       return "Hills";
+        case TILE_MOUNTAIN:    return "Mountain";
+        case TILE_SNOW:        return "Snow";
+        default:               return "Unknown Tile";
+    }
+}
+
+
 void drawDebug(Player* player, Camera2D* camera)
 {
     char positionText[100];
@@ -238,6 +254,9 @@ int main(void)
     Vector2 safePos = findSafeSpawn();
     Player player = createPlayer(safePos, 55.0f, GREEN, 12.0f);
     player.base.update = updatePlayer;
+    snprintf(player.biomeName, sizeof(player.biomeName), "%s", biomeName(getBiomeAt((int)safePos.x, (int)safePos.y)));
+    snprintf(player.tileName, sizeof(player.tileName), "%s", tileName(getTileAt((int)safePos.x, (int)safePos.y)));
+    printf("Player spawned at safe position (%.2f, %.2f) in biome %s on tile %s\n", safePos.x*0.01, safePos.y*0.01, player.biomeName, player.tileName);
 
     Game game = {
         .isPaused = false,
