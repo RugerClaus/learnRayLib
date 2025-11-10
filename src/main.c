@@ -259,7 +259,7 @@ int main(void)
     Player player = createPlayer(safePos, 55.0f, GREEN, 12.0f);
     player.base.update = updatePlayer;
     snprintf(player.biomeName, sizeof(player.biomeName), "%s", biomeName(getBiomeAt((int)safePos.x, (int)safePos.y)));
-    snprintf(player.tileName, sizeof(player.tileName), "%s", tileName(getTileAt((int)safePos.x, (int)safePos.y)));
+    snprintf(player.tileName, sizeof(player.tileName), "%s", tileName(getTileAt((int)player.base.position.x*0.01, (int)player.base.position.y*0.01)));
     printf("Player spawned at safe position (%.2f, %.2f) in biome %s on tile %s\n", safePos.x*0.01, safePos.y*0.01, player.biomeName, player.tileName);
 
     Game game = {
