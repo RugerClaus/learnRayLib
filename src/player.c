@@ -58,36 +58,9 @@ void drawUI(Player* player)
 }
 
 
-void updatePlayer(Entity* self, float dt, int TILE_SIZE)
+void updatePlayer(Entity* self, float dt)
 {
     Player* player = (Player*)self;
-    
-
-    int deltaX = 0;
-    int deltaY = 0;
-
-    if (IsKeyDown(KEY_W)) deltaY = -1; // Up
-    if (IsKeyDown(KEY_S)) deltaY = 1;  // Down
-    if (IsKeyDown(KEY_A)) deltaX = -1; // Left
-    if (IsKeyDown(KEY_D)) deltaX = 1;  // Right
-
-    int currentTileX = (int)(player->base.position.x / TILE_SIZE);
-    int currentTileY = (int)(player->base.position.y / TILE_SIZE);
-
-    int intendedTileX = currentTileX + deltaX;
-    int intendedTileY = currentTileY + deltaY;
-
-    TileType nextTile = getTileAt(intendedTileX, intendedTileY);
-
-    if(nextTile == TILE_WATER_DEEP) {
-        // Can't move here
-        printf("Blocked! Tile is water.\n");
-    } else {
-        // Move the player
-        player->base.position.x += deltaX * TILE_SIZE;
-        player->base.position.y += deltaY * TILE_SIZE;
-    }
-
     MovePlayer(player, dt);
 
 }
@@ -106,7 +79,7 @@ void drawPlayer(Entity* self)
     drawUI(player);
 }
 
-void handlePlayerInput(Player* player, int TILE_SIZE)
+void handlePlayerInput(Player* player)
 {
     player->intent = 0;
     if (IsKeyDown(KEY_D)) player->intent |= 1;

@@ -122,7 +122,7 @@ void handleInput(Player* player, Game* game, Debug* debug, float dt, StateManage
     {
         if(!game->isPaused)
         {
-            handlePlayerInput(player, TILE_SIZE);
+            handlePlayerInput(player);
             if (IsKeyPressed(KEY_R)) 
             {
                 Vector2 safePos = findSafeSpawn();
@@ -193,7 +193,6 @@ const char* tileName(TileType tile)
     }
 }
 
-
 void drawDebug(Player* player, Camera2D* camera)
 {
     char positionText[100];
@@ -220,6 +219,11 @@ void drawDebug(Player* player, Camera2D* camera)
             char cameraZoom[50];
             sprintf(cameraZoom, "Camera Zoom: %.2f", camera->zoom);
             DrawText(cameraZoom,10,110,20, BLACK);
+
+            const char* tile = tileName(getTileAt((int)player->base.position.x / TILE_SIZE, (int)player->base.position.y / TILE_SIZE));
+            char tileText[50];
+            sprintf(tileText, "Tile: %s", tile);
+            DrawText(tileText, 10, 130, 20, BLACK);
             
             DrawFPS(GetScreenWidth()-90, 5);
 }
@@ -311,14 +315,14 @@ int main(void)
                 UpdateCameraZoom(&camera);
                 camera.zoom = game.zoom;
                 UpdateCameraPosition(&camera, &player);
-                UpdateChunks(&player, &settings);
+                UpdateChunks((Entity*)&player, &settings);
                 updateEntity((Entity*)&player,dt);
             }
             
             BeginDrawing();
             ClearBackground(BLUE);
             BeginMode2D(camera);
-            DrawChunks(&player, &settings);
+            DrawChunks((Entity*)&player, &settings);
 
             int startRow = (int)floor(player.base.position.y / tileSize - halfViewH / tileSize) - 1;
             int endRow   = (int)ceil (player.base.position.y / tileSize + halfViewH / tileSize) + 1;

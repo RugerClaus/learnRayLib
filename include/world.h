@@ -3,7 +3,6 @@
 #include <raylib.h>
 #include <stdlib.h>
 #include <time.h>
-#include "player.h"
 #include "settings.h"
 #include "entity.h"
 
@@ -65,8 +64,8 @@ int getWorldSeed();
 int setWorldSeed(int seed);
 int randRange(int min, int max);
 void GenerateChunk(Chunk* chunk, int chunkX, int chunkY);
-void UpdateChunks(Player* player, Settings* settings);
-void DrawChunks(Player* player, Settings* settings);
+void UpdateChunks(Entity* entity, Settings* settings);
+void DrawChunks(Entity* entity, Settings* settings);
 void drawTitleScreenMap(Camera2D* camera, float dt);
 void DrawChunksTitle(Camera2D* camera, Settings* settings);
 void UpdateTitleChunks(Camera2D* camera, Settings* settings);

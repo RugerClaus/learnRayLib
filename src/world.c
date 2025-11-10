@@ -169,14 +169,14 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY)
 
 
 
-void UpdateChunks(Player* player, Settings* settings) {
-    int playerChunkX = (int)(player->base.position.x / (CHUNK_SIZE * TILE_SIZE));
-    int playerChunkY = (int)(player->base.position.y / (CHUNK_SIZE * TILE_SIZE));
+void UpdateChunks(Entity* entity, Settings* settings) {
+    int entityChunkX = (int)(entity->position.x / (CHUNK_SIZE * TILE_SIZE));
+    int entityChunkY = (int)(entity->position.y / (CHUNK_SIZE * TILE_SIZE));
 
     for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
         for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
-            int chunkX = playerChunkX + dx;
-            int chunkY = playerChunkY + dy;
+            int chunkX = entityChunkX + dx;
+            int chunkY = entityChunkY + dy;
 
             if (chunkX >= 0 && chunkY >= 0 && chunkX < 100 && chunkY < 100) {
                 Chunk* chunk = &chunks[chunkX][chunkY];
@@ -192,8 +192,8 @@ void UpdateChunks(Player* player, Settings* settings) {
         for (int chunkY = 0; chunkY < 100; chunkY++) {
             Chunk* chunk = &chunks[chunkX][chunkY];
 
-            int distX = abs(chunkX - playerChunkX);
-            int distY = abs(chunkY - playerChunkY);
+            int distX = abs(chunkX - entityChunkX);
+            int distY = abs(chunkY - entityChunkY);
             if (distX > settings->renderDistance || distY > settings->renderDistance) {
                 if (chunk->isLoaded) {
                     
@@ -205,18 +205,18 @@ void UpdateChunks(Player* player, Settings* settings) {
     }
 
     
-    printf("Current chunk: (%d, %d)\n", playerChunkX, playerChunkY);
+    printf("Current chunk: (%d, %d)\n", entityChunkX, entityChunkY);
 }
 
 
-void DrawChunks(Player* player, Settings* settings) {
-    int playerChunkX = (int)(player->base.position.x / (CHUNK_SIZE * TILE_SIZE));
-    int playerChunkY = (int)(player->base.position.y / (CHUNK_SIZE * TILE_SIZE));
+void DrawChunks(Entity* entity, Settings* settings) {
+    int entityChunkX = (int)(entity->position.x / (CHUNK_SIZE * TILE_SIZE));
+    int entityChunkY = (int)(entity->position.y / (CHUNK_SIZE * TILE_SIZE));
 
     for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
         for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
-            int chunkX = playerChunkX + dx;
-            int chunkY = playerChunkY + dy;
+            int chunkX = entityChunkX + dx;
+            int chunkY = entityChunkY + dy;
 
             if (chunkX >= 0 && chunkY >= 0 && chunkX < 100 && chunkY < 100) {
                 Chunk* chunk = &chunks[chunkX][chunkY];
