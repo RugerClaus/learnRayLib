@@ -3,7 +3,8 @@
 - **Press Space** to start the game (if that isn't obvious).
 - **F10** will close the program at any time.
 - Use **WASD keys** to move up, left, down, and right.
-
+- Use Left Shift to sprint
+- use Left Control to sneak
 
 ## Sea of bullshit
 
@@ -69,3 +70,5 @@ implemented a getChunk function to aid in finding the biome and tile at a given 
 Next on the agenda is preventing the player from entering water tiles (for now, I will be making a boat system or something) and generating the first entities, the static entities (trees, rocks). That tile map is included in this update.
 
 The song for the sound track is call Isle of Atmospheres
+
+added sprinting and sneaking despite not having any characters. may as well work on basic mechanics

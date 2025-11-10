@@ -95,6 +95,24 @@ void handlePlayerInput(Player* player, int TILE_SIZE)
     if (IsKeyReleased(KEY_A) && player->intent == 2) player->intent = 0;
     if (IsKeyReleased(KEY_S) && player->intent == 4) player->intent = 0;
     if (IsKeyReleased(KEY_W) && player->intent == 8) player->intent = 0;
+
+    if (IsKeyPressed(KEY_LEFT_SHIFT))
+    {
+        player->speed *= 2.0f;
+    }
+    if (IsKeyReleased(KEY_LEFT_SHIFT))
+    {
+        player->speed *= 0.5f;
+    }
+
+    if (IsKeyPressed(KEY_LEFT_CONTROL))
+    {
+        player->speed *= 0.5f;
+    }
+    if (IsKeyReleased(KEY_LEFT_CONTROL))
+    {
+        player->speed *= 2.0f;
+    }
 }
 
 
