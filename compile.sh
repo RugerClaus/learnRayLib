@@ -1,1 +1,1 @@
-gcc src/main.c src/player.c src/world.c src/entity.c src/state/appstate.c -o game -lraylib -lm -lpthread -ldl -lrt -lX11
+gcc src/main.c src/player.c src/world.c src/entity.c src/state/appstate.c -o game.game -lraylib -lm -lpthread -ldl -lrt -lX11
