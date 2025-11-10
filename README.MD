@@ -72,3 +72,9 @@ Next on the agenda is preventing the player from entering water tiles (for now, 
 The song for the sound track is call Isle of Atmospheres
 
 added sprinting and sneaking despite not having any characters. may as well work on basic mechanics
+
+oops didn't update this last commit. 
+
+Updated world generation to be agnostic of all entities. But i have hit a major wall with calculating the biomes and tiles
+may have to rewrite the world gen logic. It will be fine for the title screen background, which I've separated into separate functions so that 
+I don't have to deal with rewriting that as it works fine as is.
