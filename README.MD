@@ -80,3 +80,8 @@ may have to rewrite the world gen logic. It will be fine for the title screen ba
 I don't have to deal with rewriting that as it works fine as is.
 
 testing offset of player and tiles, but I think the tiles are all kinda fucked. I'm going to re-implement them at some point if necessary but I hope I just have some calculations off, but changing the position I calculate for the tiles isn't changing anything and the biome is correct in the debug overlay, so the tile system is fucky
+
+The camera now follows the player in a cool manner
+
+
+CURRENTLY THE FUCKING TILES SHOW WRONG

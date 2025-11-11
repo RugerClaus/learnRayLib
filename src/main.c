@@ -147,14 +147,21 @@ void handleInput(Player* player, Game* game, Debug* debug, float dt, StateManage
     }
 }
 
-void UpdateCameraPosition(Camera2D* camera, Player* player) {
+static bool cameraSettling = true; // this all really sucked because of the camera movement starting at 30000,30000 and gliding towards the player
+//hopefully what I've done here works better and from what I can tell it keeps the camera centered on the player from the start
+//Now hopefully I can implement the tile logic too better. this gives me hope
 
-    camera->target = (Vector2){ player->base.position.x, player->base.position.y };
-    
+void UpdateCameraPosition(Camera2D* camera, Player* player) {
+    if (cameraSettling) {
+        camera->target = player->base.position;
+        cameraSettling = false;
+    } else {
+        float lerp = 0.05f;
+        camera->target.x += (player->base.position.x - camera->target.x) * lerp;
+        camera->target.y += (player->base.position.y - camera->target.y) * lerp;
+    }
     camera->offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     player->offset = (Vector2){ camera->target.x - camera->offset.x, camera->target.y - camera->offset.y };
-
-    printf("Camera Target: (%.2f, %.2f)\n", camera->target.x, camera->target.y);
 }
 
 

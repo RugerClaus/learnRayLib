@@ -54,7 +54,7 @@ int randRange(int min, int max) {
 }
 
 void InitRandom() {
-    srand(time(NULL)); // seed PRNG with current time
+    srand(time(NULL)); 
 }
 
 int setWorldSeed(int seed) {
@@ -268,8 +268,8 @@ void DrawChunksTitle(Camera2D* camera, Settings* settings)
     int camChunkX = (int)(camera->target.x / (CHUNK_SIZE * TILE_SIZE));
     int camChunkY = (int)(camera->target.y / (CHUNK_SIZE * TILE_SIZE));
 
-    for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
-        for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
+    for (int dx = -10; dx <= 10; dx++) {
+        for (int dy = -10; dy <= 10; dy++) {
             int chunkX = camChunkX + dx;
             int chunkY = camChunkY + dy;
 
@@ -305,8 +305,8 @@ void UpdateTitleChunks(Camera2D* camera, Settings* settings)
     int centerChunkX = camWorldX / (CHUNK_SIZE * TILE_SIZE);
     int centerChunkY = camWorldY / (CHUNK_SIZE * TILE_SIZE);
 
-    for (int dx = -settings->renderDistance; dx <= settings->renderDistance; dx++) {
-        for (int dy = -settings->renderDistance; dy <= settings->renderDistance; dy++) {
+    for (int dx = -10; dx <= 10; dx++) {
+        for (int dy = -10; dy <= 10; dy++) {
             int chunkX = centerChunkX + dx;
             int chunkY = centerChunkY + dy;
 
@@ -395,7 +395,11 @@ Vector2 findSafeSpawn() {
 
         int tileX = (int)(spawn.x / TILE_SIZE);
         int tileY = (int)(spawn.y / TILE_SIZE);
-        tile = getTileAt((int)spawn.x, (int)spawn.y);
+        
+        // Ensure getTileAt uses the correct logic for retrieving tile
+        tile = getTileAt(tileX, tileY);
+        printf("Checking tile at (%d, %d): %d\n", tileX, tileY, tile);
+        
     } while(tile == TILE_WATER_DEEP || tile == TILE_SHORE);
 
     return spawn;
