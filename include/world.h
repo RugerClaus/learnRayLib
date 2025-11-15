@@ -39,13 +39,31 @@ extern Rectangle tileRects[];
 
 // Tile mapping (index into the sprite sheet)
 typedef enum {
-    TILE_WATER_DEEP,
-    TILE_SHORE,
-    TILE_SAND,
-    TILE_GRASS,
-    TILE_HILLS,
-    TILE_MOUNTAIN,
-    TILE_SNOW,
+    TILE_WATER_OCEAN_5,
+    TILE_WATER_OCEAN_4,
+    TILE_WATER_OCEAN_3,
+    TILE_WATER_OCEAN_2,
+    TILE_WATER_OCEAN_1,
+    TILE_PLAINS_5,
+    TILE_PLAINS_4,
+    TILE_PLAINS_3,
+    TILE_PLAINS_2,
+    TILE_PLAINS_1,
+    TILE_WATER_SHALLOW,
+    TILE_BEACH_4,
+    TILE_BEACH_3,
+    TILE_BEACH_2,
+    TILE_BEACH_1,
+    TILE_DESERT_5,
+    TILE_DESERT_4,
+    TILE_DESERT_3,
+    TILE_DESERT_2,
+    TILE_DESERT_1,
+    TILE_MOUNTAIN_5,
+    TILE_MOUNTAIN_4,
+    TILE_MOUNTAIN_3,
+    TILE_MOUNTAIN_2,
+    TILE_MOUNTAIN_1,
     TILE_COUNT
 } TileType;
 

@@ -14,7 +14,7 @@ Rectangle tileRects[TILE_COUNT];
 
 Rectangle biomeTileRects[BIOME_COUNT][TILES_PER_BIOME];
 
-float biomeMinHeight[BIOME_COUNT] = {
+float tileMinHeight[TILE_COUNT] = {
     [BIOME_OCEAN]     = 0.0f,
     [BIOME_BEACH]     = 0.3f,
     [BIOME_PLAINS]    = 0.35f,
@@ -22,7 +22,7 @@ float biomeMinHeight[BIOME_COUNT] = {
     [BIOME_MOUNTAINS]= 0.75f
 };
 
-float biomeMaxHeight[BIOME_COUNT] = {
+float tileMaxHeight[TILE_COUNT] = {
     [BIOME_OCEAN]     = 0.3f,
     [BIOME_BEACH]     = 0.35f,
     [BIOME_PLAINS]    = 0.75f,
@@ -140,27 +140,132 @@ void GenerateChunk(Chunk* chunk, int chunkX, int chunkY)
             tempC -= height * 20.0f;
             chunk->temperature[row][col] = tempC;
 
-            Biome biome;
-            if (height < 0.4f) biome = BIOME_OCEAN;
-            else if (height < 0.45f) biome = BIOME_BEACH;
-            else if (height > 0.85f) biome = BIOME_MOUNTAINS;
+            TileType tile;
+            
+            if (height < 0.3f) // ocean biome
+            {
+                if (height < 0.05f)
+                {
+                    tile = TILE_WATER_OCEAN_5;
+                }
+                else if (height < 0.1f)
+                {
+                    tile = TILE_WATER_OCEAN_4;
+                }
+                else if (height < 0.15f)
+                {
+                    tile = TILE_WATER_OCEAN_3;
+                }
+                else if (height < 0.2f)
+                {
+                    tile = TILE_WATER_OCEAN_2;
+                }
+                else if (height < 0.3f)
+                {
+                    tile = TILE_WATER_OCEAN_1;
+                }
+            }
+            else if (height < 0.45f)
+            {
+                if (height < 0.32f)
+                {
+                    tile  = TILE_WATER_SHALLOW;
+                }
+                if (height < 0.35f)
+                {
+                    tile = TILE_BEACH_4;
+                }
+                if (height < 0.37f)
+                {
+                    tile = TILE_BEACH_3;
+                }
+                if (height < 0.4f)
+                {
+                    tile = TILE_BEACH_2;
+                }
+                if (height < 0.45f)
+                {
+                    tile = TILE_BEACH_1;
+                }
+            }
             else
             {
-                if (tempC < 0.3f) biome = BIOME_MOUNTAINS;
-                else if (tempC < 0.6f) biome = BIOME_PLAINS;
-                else biome = BIOME_DESERT;
+                if (tempC > 0.7f && height > 0.6f)  // high desert biome
+                {
+                    if (height > 0.85f)
+                    {
+                        tile = TILE_DESERT_1;
+                    }
+                    else if (height > 0.8f)
+                    {
+                        tile = TILE_DESERT_2;
+                    }
+                    else if (height > 0.7f)
+                    {
+                        tile = TILE_DESERT_3;
+                    }
+                    else if(height > 0.68f)
+                    {
+                        tile = TILE_DESERT_4;
+                    }
+                    else
+                    {
+                        tile = TILE_DESERT_5;
+                    }
+                }
+                else if (tempC < 0.7f && height < 0.75f) // plains biome
+                {
+                    if(height > 0.7f)
+                    {
+                        tile = TILE_PLAINS_1;
+                    }
+                    else if (height > 0.65f)
+                    {
+                        tile = TILE_PLAINS_2;
+                    }
+                    else if (height > 0.6f)
+                    {
+                        tile = TILE_PLAINS_3;
+                    }
+                    else if (height > 0.55f)
+                    {
+                        tile = TILE_PLAINS_4;
+                    }
+                    else
+                    {
+                        tile = TILE_PLAINS_5;
+                    }
+                }
+                else if (tempC < 0.3f && height > 0.6f) // mountain biome
+                {
+                    if (height > 0.85f)
+                    {
+                        tile = TILE_MOUNTAIN_1; // SNOW CAP
+                    }
+                    else if (height > 0.8f)
+                    {
+                        tile = TILE_MOUNTAIN_2;
+                    }
+                    else if (height > 0.75f)
+                    {
+                        tile = TILE_MOUNTAIN_3;
+                    }
+                    else if (height > 0.7f)
+                    {
+                        tile = TILE_MOUNTAIN_2;
+                    }
+                    else
+                    {
+                        tile = TILE_MOUNTAIN_1;
+                    }
+                }
             }
-            chunk->biomes[row][col] = biome;
+            chunk->tiles[row][col] = tile;
 
-            float biomeHeight = (height - biomeMinHeight[biome]) /
-                                (biomeMaxHeight[biome] - biomeMinHeight[biome]);
-            if (biomeHeight < 0) biomeHeight = 0;
-            if (biomeHeight > 1) biomeHeight = 1;
-
-            int variant = (int)(biomeHeight * TILES_PER_BIOME);
-            if (variant >= TILES_PER_BIOME) variant = TILES_PER_BIOME - 1;
-
-            chunk->tiles[row][col] = variant;
+            float tileHeight = (height - tileMinHeight[tile]) /
+                                (tileMaxHeight[tile] - tileMinHeight[tile]);
+            if (tileHeight < 0) tileHeight = 0;
+            if (tileHeight > 1) tileHeight = 1;
         }
     }
 
@@ -380,7 +485,6 @@ TileType getTileAt(int worldX, int worldY) {
     int localY = worldY % CHUNK_SIZE;
 
     Chunk* chunk = getChunk(chunkX, chunkY);
-    if (!chunk) return TILE_WATER_DEEP;
 
     return chunk->tiles[localY][localX];
 }
@@ -400,7 +504,7 @@ Vector2 findSafeSpawn() {
         tile = getTileAt(tileX, tileY);
         printf("Checking tile at (%d, %d): %d\n", tileX, tileY, tile);
         
-    } while(tile == TILE_WATER_DEEP || tile == TILE_SHORE);
+    } while(tile == TILE_WATER_OCEAN_1||TILE_WATER_OCEAN_2||TILE_WATER_OCEAN_3||TILE_WATER_OCEAN_4||TILE_WATER_OCEAN_5||tile == TILE_WATER_SHALLOW);
 
     return spawn;
 }

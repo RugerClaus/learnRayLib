@@ -85,3 +85,18 @@ The camera now follows the player in a cool manner
 
 
 CURRENTLY THE FUCKING TILES SHOW WRONG
+
+this is a temporary commit... I have started updating the way chunks are generated
+
+Instead of calculating the height and temperature and constructing biomes, i generate tiles based on these factors.
+
+It's a lot more if statements, and I bet I will need to find a way to do this dynamically likely with more perlin noise, but for now
+it is important that I am able to track the tiles that the player is on. then I can use the tile tile types to calculate the biomes
+it will be far more accurate as far as biome detection goes with my tile system. and the tile system will be able to be expanded on
+although not dynamically for now which is fine. I'm not making minecraft.
+
+
+Now the world gen is a bit broken but now i'm calculating with the tiles. I am adapting the min and max biome height to be tile height
+I will rework my if else situation in the chunk generator to handle this.
+I will calculate the biome based on temperature, and then the tiles in the biome based on height.
+hopefully this will smooth the tiles out more.

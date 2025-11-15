@@ -160,7 +160,7 @@ void UpdateCameraPosition(Camera2D* camera, Player* player) {
         camera->target.x += (player->base.position.x - camera->target.x) * lerp;
         camera->target.y += (player->base.position.y - camera->target.y) * lerp;
     }
-    camera->offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    camera->offset = (Vector2){ GetScreenWidth()/2, GetScreenHeight() / 2.0f };
     player->offset = (Vector2){ camera->target.x - camera->offset.x, camera->target.y - camera->offset.y };
 }
 
@@ -189,13 +189,31 @@ const char* tileName(TileType tile)
 {
     switch (tile)
     {
-        case TILE_WATER_DEEP: return "Deep Water";
-        case TILE_SHORE:       return "Shore";
-        case TILE_SAND:        return "Sand";
-        case TILE_GRASS:       return "Grass";
-        case TILE_HILLS:       return "Hills";
-        case TILE_MOUNTAIN:    return "Mountain";
-        case TILE_SNOW:        return "Snow";
+        case TILE_WATER_OCEAN_5:  return "Deep Water 5";
+        case TILE_WATER_OCEAN_4: return "Deep Water 4";
+        case TILE_WATER_OCEAN_3: return "Deep Water 3";
+        case TILE_WATER_OCEAN_2: return "Deep Water 2";
+        case TILE_WATER_OCEAN_1: return "Deep Water 1";
+        case TILE_PLAINS_5: return "Low Grass 2";
+        case TILE_PLAINS_4: return "Low Grass 1";
+        case TILE_PLAINS_3: return "Patchy Grass";
+        case TILE_PLAINS_2: return "High Grass 2";
+        case TILE_PLAINS_1: return "High Grass 1";
+        case TILE_WATER_SHALLOW: return "Shallow Water";
+        case TILE_BEACH_4: return "Beach Sand 4";
+        case TILE_BEACH_3: return "Beach Sand 3";
+        case TILE_BEACH_2: return "Beach Sand 2";
+        case TILE_BEACH_1: return "Beach Sand 1";
+        case TILE_DESERT_5: return "Desert Sand";
+        case TILE_DESERT_4: return "Desert Sand";
+        case TILE_DESERT_3: return "Rocky Desert Sand";
+        case TILE_DESERT_2: return "Worn Desert Stone";
+        case TILE_DESERT_1: return "Stone";
+        case TILE_MOUNTAIN_5: return "High Grass 2";
+        case TILE_MOUNTAIN_4: return "High Grass 3";
+        case TILE_MOUNTAIN_3: return "Stone";
+        case TILE_MOUNTAIN_2: return "Stone";
+        case TILE_MOUNTAIN_1: return "Icy Snow Cap";
         default:               return "Unknown Tile";
     }
 }
@@ -254,7 +272,6 @@ int main(void)
     SetMusicVolume(music, 1.0f);
 
     Camera2D camera = { 0 };
-    camera.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
     camera.rotation = 0.0f;
     camera.zoom = 3.0f;
     
@@ -262,7 +279,7 @@ int main(void)
     
 
     
-    Vector2 safePos = findSafeSpawn();
+    Vector2 safePos = {24,50};
     Player player = createPlayer(safePos, 55.0f, GREEN, 12.0f);
     player.base.update = updatePlayer;
     snprintf(player.biomeName, sizeof(player.biomeName), "%s", biomeName(getBiomeAt((int)safePos.x, (int)safePos.y)));
