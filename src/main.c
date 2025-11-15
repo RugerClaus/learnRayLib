@@ -279,7 +279,7 @@ int main(void)
     
 
     
-    Vector2 safePos = {24,50};
+    Vector2 safePos = findSafeSpawn();
     Player player = createPlayer(safePos, 55.0f, GREEN, 12.0f);
     player.base.update = updatePlayer;
     snprintf(player.biomeName, sizeof(player.biomeName), "%s", biomeName(getBiomeAt((int)safePos.x, (int)safePos.y)));

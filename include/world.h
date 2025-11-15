@@ -81,6 +81,7 @@ void initWorld();
 int getWorldSeed();
 int setWorldSeed(int seed);
 int randRange(int min, int max);
+TileType generateBiomeTiles(Biome biome,float height);
 void GenerateChunk(Chunk* chunk, int chunkX, int chunkY);
 void UpdateChunks(Entity* entity, Settings* settings);
 void DrawChunks(Entity* entity, Settings* settings);

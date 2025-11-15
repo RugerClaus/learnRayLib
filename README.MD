@@ -100,3 +100,6 @@ Now the world gen is a bit broken but now i'm calculating with the tiles. I am a
 I will rework my if else situation in the chunk generator to handle this.
 I will calculate the biome based on temperature, and then the tiles in the biome based on height.
 hopefully this will smooth the tiles out more.
+
+
+I take that back. the whole think is borked. i gotta fix that somehow. may take this in a different direction.
